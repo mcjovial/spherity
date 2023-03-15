@@ -17,7 +17,7 @@ export class SecretnotesService {
   }
 
   async findById(id: string): Promise<SecretNote> {
-    return await this.secretNoteRepository.findOne(id);
+    return await this.secretNoteRepository.findOne({ where: { id } });
   }
 
   async findAll(): Promise<SecretNote[]> {
