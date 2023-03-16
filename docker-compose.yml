@@ -1,27 +1,27 @@
 version: '3.9'
 services:
-  app:
-    container_name: nestjs-app
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: development
-    ports:
-      - '3000:3000'
-    environment:
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydatabase
-    env_file:
-      - .env
-    depends_on:
-      - postgres
-    volumes:
-      - .:/app # any change to base folder should be reflected
-      - /app/node_modules
-    command: yarn start:dev # overrides CMD from dockerfile
+  # app:
+  #   container_name: nestjs-app
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   ports:
+  #     - '3000:3000'
+  #   environment:
+  #     POSTGRES_HOST: postgres
+  #     POSTGRES_PORT: 5432
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: mydatabase
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - .:/app # any change to base folder should be reflected
+  #     - /app/node_modules
+  #   command: yarn start:dev # overrides CMD from dockerfile
 
   postgres:
     container_name: postgres-db

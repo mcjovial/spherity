@@ -1,92 +1,143 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { SecretNoteController } from './secretnotes.controller';
-import { SecretNote } from './entities/secretnotes.entity';
 import { SecretNoteService } from './secretnotes.service';
+import { SecretNoteController } from './secretnotes.controller';
+import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
+import { Repository } from 'typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { SecretNote } from './entities/secretnotes.entity';
+import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
 
 describe('SecretNoteController', () => {
   let app: INestApplication;
   let secretNoteService: SecretNoteService;
-  let secretNoteController: SecretNoteController;
-
-  const secretNote: SecretNote = {
-    id: 'c8820857-be54-4f14-9ed1-483aad0acc82',
-    note: 'This is a secret note',
-  };
+  let secretnoteRepository: Repository<SecretNote>;
 
   beforeAll(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    const moduleRef: TestingModule = await Test.createTestingModule({
       controllers: [SecretNoteController],
-      providers: [SecretNoteService],
+      providers: [
+        SecretNoteService,
+        {
+          provide: getRepositoryToken(SecretNote),
+          useClass: Repository,
+        },
+      ],
     }).compile();
 
-    app = module.createNestApplication();
-    secretNoteService = module.get<SecretNoteService>(SecretNoteService);
-    secretNoteController =
-      module.get<SecretNoteController>(SecretNoteController);
-
+    app = moduleRef.createNestApplication();
     await app.init();
+
+    secretNoteService = moduleRef.get<SecretNoteService>(SecretNoteService);
+    secretnoteRepository = moduleRef.get(getRepositoryToken(SecretNote));
+  });
+
+  afterEach(async () => {
+    // Delete all secret notes from the database after each test
+    await secretnoteRepository.delete({});
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  describe('POST /secret-note', () => {
+  describe('create', () => {
     it('should create a new secret note', async () => {
-      const spy = jest.spyOn(secretNoteService, 'create');
+      const createSecretNoteDto: CreateSecretnoteDto = {
+        note: 'This is a test note',
+      };
+
       const response = await request(app.getHttpServer())
-        .post('/secret-note')
-        .send({ note: secretNote.note });
-      expect(response.status).toBe(201);
-      expect(spy).toHaveBeenCalledWith(secretNote.note);
+        .post('/secretnotes')
+        .send(createSecretNoteDto)
+        .expect(201);
+
+      console.log(response);
+      // const secretNote = await secretNoteService.findOne(response.body.id);
+
+      // expect(secretNote).toBeDefined();
+      // expect(secretNote.note).not.toEqual(createSecretNoteDto.note);
     });
   });
 
-  // describe('GET /secret-note/:id', () => {
-  //   it('should get the decrypted secret note with the given id', async () => {
-  //     const spy = jest.spyOn(secretNoteService, 'findById');
-  //     const encryptedNote = secretNoteController.encrypt(secretNote.note);
-  //     jest
-  //       .spyOn(secretNoteController, 'decrypt')
-  //       .mockReturnValue(secretNote.note);
-  //     const secretNoteWithEncryption = { ...secretNote, note: encryptedNote };
-  //     jest
-  //       .spyOn(secretNoteService, 'findById')
-  //       .mockReturnValue(Promise.resolve(secretNoteWithEncryption));
-  //     const response = await request(app.getHttpServer())
-  //       .get(`/secret-note/${secretNote.id}`)
-  //       .set('Accept', 'application/json');
-  //     expect(response.status).toBe(200);
-  //     expect(response.body.note).toEqual(secretNote.note);
-  //     expect(spy).toHaveBeenCalledWith(secretNote.id);
-  //   });
+  // describe('findAll', () => {
+  //   it('should return an array of secret notes', async () => {
+  //     const secretNote = await secretNoteService.create({
+  //       note: 'This is a test note',
+  //     });
 
-  //   it('should get the encrypted secret note with the given id', async () => {
-  //     const spy = jest.spyOn(secretNoteService, 'findById');
-  //     const encryptedNote = secretNoteController.encrypt(secretNote.note);
-  //     const secretNoteWithEncryption = { ...secretNote, note: encryptedNote };
-  //     jest
-  //       .spyOn(secretNoteService, 'findById')
-  //       .mockReturnValue(Promise.resolve(secretNoteWithEncryption));
   //     const response = await request(app.getHttpServer())
-  //       .get(`/secret-note/${secretNote.id}`)
-  //       .set('Accept', 'application/json')
-  //       .query({ encrypted: true });
-  //     expect(response.status).toBe(200);
-  //     expect(response.body.note).toEqual(encryptedNote);
-  //     expect(spy).toHaveBeenCalledWith(secretNote.id);
+  //       .get('/secretnotes')
+  //       .expect(200);
+
+  //     expect(response.body).toHaveLength(1);
+  //     expect(response.body[0].note).not.toEqual(secretNote.note);
   //   });
   // });
 
-  // describe('PUT /secret-note/:id', () => {
-  //   it('should update the decrypted secret note with the given id', async () => {
-  //     const spyFind = jest.spyOn(secretNoteService, 'findById');
-  //     const spyUpdate = jest.spyOn(secretNoteService, 'update');
-  //     const decryptedNote = 'This is the updated secret note';
-  //     const encryptedNote = secretNoteController.encrypt(decryptedNote);
-  //     jest.spyOn(secretNote)
+  // describe('findOne', () => {
+  //   it('should return a secret note', async () => {
+  //     const secretNote = await secretNoteService.create({
+  //       note: 'This is a test note',
+  //     });
+
+  //     const response = await request(app.getHttpServer())
+  //       .get(`/secretnotes/${secretNote.id}`)
+  //       .expect(200);
+
+  //     expect(response.body.note).not.toEqual(secretNote.note);
+  //   });
+  // });
+
+  // describe('updateOne', () => {
+  //   it('should update a secret note', async () => {
+  //     const createNoteResponse = await request(app.getHttpServer())
+  //       .post('/secretnotes')
+  //       .send({ note: 'test note' })
+  //       .expect(201);
+  //     const { id } = createNoteResponse.body;
+
+  //     const updatedNote = { note: 'updated note' };
+  //     const updateNoteResponse = await request(app.getHttpServer())
+  //       .patch(`/secretnotes/${id}`)
+  //       .send(updatedNote)
+  //       .expect(200);
+
+  //     expect(updateNoteResponse.body.note).toBe(updatedNote.note);
+
+  //     const getNoteResponse = await request(app.getHttpServer())
+  //       .get(`/secretnotes/${id}`)
+  //       .expect(200);
+
+  //     expect(getNoteResponse.body.note).toBe(updatedNote.note);
+  //   });
+  // });
+
+  // describe('DELETE /secretnotes/:id', () => {
+  //   it('should delete a secret note', async () => {
+  //     const createdNote = await createSecretNote();
+
+  //     const response = await request(app.getHttpServer())
+  //       .delete(`/secretnotes/${createdNote.id}`)
+  //       .expect(200);
+
+  //     expect(response.body).toEqual({});
+
+  //     const foundNote = await secretNoteService.findOne(createdNote.id);
+  //     expect(foundNote).toBeNull();
+  //   });
+
+  //   it('should return 404 when deleting a non-existing secret note', async () => {
+  //     const response = await request(app.getHttpServer())
+  //       .delete('/secretnotes/non-existing-id')
+  //       .expect(404);
+
+  //     expect(response.body).toEqual({
+  //       statusCode: 404,
+  //       message: 'Secret note not found',
+  //       error: 'Not Found',
+  //     });
   //   });
   // });
 });

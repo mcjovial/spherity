@@ -5,6 +5,7 @@ import * as Joi from 'joi';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SecretNote } from './secretnotes/entities/secretnotes.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
         synchronize: true,
       }),
     }),
+    PaymentsModule,
   ],
   controllers: [],
   providers: [],

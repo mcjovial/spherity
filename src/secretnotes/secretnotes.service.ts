@@ -43,9 +43,6 @@ export class SecretNoteService {
 
   async findOne(id: string, encrypted?: boolean): Promise<SecretNote> {
     const note = await this.secretnoteRepository.findOne({ where: { id } });
-    if (!note) {
-      return null;
-    }
     if (encrypted) {
       return note;
     }
@@ -59,6 +56,7 @@ export class SecretNoteService {
   async updateOne(
     id: string,
     secretNote: UpdateSecretNoteDto,
+    encrypted?: boolean,
   ): Promise<SecretNote> {
     // Generate RSA key pair
     const key = new NodeRSA({ b: 512 });
@@ -74,7 +72,7 @@ export class SecretNoteService {
       privateKey,
     });
 
-    return await this.findOne(id);
+    return await this.findOne(id, encrypted);
   }
 
   async delete(id: string): Promise<void> {
