@@ -3,9 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SecretnotesModule } from './secretnotes/secretnotes.module';
 import * as Joi from 'joi';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SecretNote } from './secretnotes/entities/secretnotes.entity';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -32,11 +30,9 @@ import { PaymentsModule } from './payments/payments.module';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
         autoLoadEntities: true,
-        // entities: [SecretNote],
         synchronize: true,
       }),
     }),
-    PaymentsModule,
   ],
   controllers: [],
   providers: [],

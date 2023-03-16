@@ -14,12 +14,8 @@ export class SecretNoteService {
   ) {}
 
   async create(secretNote: CreateSecretnoteDto): Promise<SecretNote> {
-    // Generate RSA key pair
-    const key = new NodeRSA({ b: 512 });
-    const privateKey = key.exportKey('private');
-
-    // Encrypt secret note with public key
-    const encryptedNote = key.encrypt(secretNote.note, 'base64');
+    // Encrypt note
+    const { encryptedNote, privateKey } = await this.encrypter(secretNote.note);
 
     // Save encrypted note to database
     const newSecretNote = this.secretnoteRepository.create({
@@ -34,8 +30,7 @@ export class SecretNoteService {
     const secretnotes = await this.secretnoteRepository.find();
     return secretnotes.map((note) => {
       // Decrypt secret note with private key
-      const key = new NodeRSA(note.privateKey);
-      const decryptedNote = key.decrypt(note.note, 'utf8');
+      const decryptedNote = this.decrypter(note.note, note.privateKey);
       note.note = decryptedNote;
       return note;
     });
@@ -47,8 +42,7 @@ export class SecretNoteService {
       return note;
     }
     // Decrypt secret note with private key
-    const key = new NodeRSA(note.privateKey);
-    const decryptedNote = key.decrypt(note.note, 'utf8');
+    const decryptedNote = this.decrypter(note.note, note.privateKey);
     note.note = decryptedNote;
     return note;
   }
@@ -58,12 +52,8 @@ export class SecretNoteService {
     secretNote: UpdateSecretNoteDto,
     encrypted?: boolean,
   ): Promise<SecretNote> {
-    // Generate RSA key pair
-    const key = new NodeRSA({ b: 512 });
-    const privateKey = key.exportKey('private');
-
-    // Encrypt secret updated note with public key
-    const encryptedNote = key.encrypt(secretNote.note, 'base64');
+    // Encrypt note
+    const { encryptedNote, privateKey } = await this.encrypter(secretNote.note);
 
     // Save updated note and its private key
     await this.secretnoteRepository.update(id, {
@@ -77,5 +67,20 @@ export class SecretNoteService {
 
   async delete(id: string): Promise<void> {
     await this.secretnoteRepository.delete(id);
+  }
+
+  async encrypter(note: string) {
+    // Generate RSA key pair
+    const key = new NodeRSA({ b: 512 });
+    const privateKey = key.exportKey('private');
+
+    // Encrypt secret note with public key
+    const encryptedNote = key.encrypt(note, 'base64');
+    return { privateKey, encryptedNote };
+  }
+
+  decrypter(secreteNote: string, privateKey: string) {
+    const key = new NodeRSA(privateKey);
+    return key.decrypt(secreteNote, 'utf8');
   }
 }
