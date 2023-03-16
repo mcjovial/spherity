@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { async } from 'rxjs';
 import { Repository } from 'typeorm';
 import { SecretNote } from './entities/secretnotes.entity';
 import { SecretNoteService } from './secretnotes.service';
+import * as NodeRSA from 'node-rsa';
 
 describe('SecretNoteService', () => {
   let secretNoteService: SecretNoteService;
@@ -47,6 +47,12 @@ describe('SecretNoteService', () => {
 
   describe('createSecretNote', () => {
     it('should create a new secret note', async () => {
+      jest.spyOn(secretNotesRepository, 'create').mockReturnValueOnce({
+        id: '502f0f3e-ae93-4225-ad4e-22994d431e7e',
+        note: 'TNrPd8+rQAFi7tKLIVV6oaF4jvypcNmpej4K0wNP4Pn24ko3bGCQwM19TZPTiUoVZP9LdsnkOflOKUAeYWhO3g==',
+        privateKey:
+          '-----BEGIN RSA PRIVATE KEY-----\nMIIBOQIBAAJBAKCinXJLu5u4TJgCXjZPILtT06Cgqy5YqNNuw4/ljnAC5qLl+eyL\nhiO5KXufo5y7zuMr9YPYisdg/URNbUUHZ6MCAwEAAQJAL9PbHyHPbTD1lTj3RiJP\nM5dk5mmQLk91jOZo0dpei5jIsLZuwMYBXlvJVu4fqG/7eGpaNjBROGCasE2koE81\nuQIhANHhSZ/z1GVXzsIEtTpWzJ39C25aBeMgW8TbhYmg9VE3AiEAw+8UyC93TNIX\nxnP/QBV2cNMonU1Ke4/ajhSg1WFzwvUCIGxXtvD6Jq92B4aCdac6/X+lC8yYbieU\nIatagvHMBDc7AiAEXvMBvD1XE2DAZpoNHe10euFvEOhWdVEU1lT4LaJdeQIgUqL8\nHz3PSNaIXyO2deHckbSfg5sFy/1FNsMeq7aDoNw=\n-----END RSA PRIVATE KEY-----',
+      });
       await secretNoteService.create({
         note: 'This is a new note',
       });
@@ -69,8 +75,11 @@ describe('SecretNoteService', () => {
   });
 
   describe('deleteSecretNote', () => {
-    it('should accept id and delete note data', async () => {
-      await secretNoteService.delete('502f0f3e-ae93-4225-ad4e-22994d431e7e');
+    it('should call secretNotesRepository.delete with correct params', async () => {
+      const id = '502f0f3e-ae93-4225-ad4e-22994d431e7e';
+      await secretNoteService.delete(id);
+      expect(secretNotesRepository.delete).toHaveBeenCalledWith(id);
+      expect(secretNotesRepository.delete);
     });
   });
 
