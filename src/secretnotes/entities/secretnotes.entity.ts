@@ -13,10 +13,10 @@ export class SecretNote {
   id: string;
   @Column('text')
   note: string;
+  @Column('text')
+  privateKey?: string;
   @CreateDateColumn({ name: 'created_at' })
-  created_at: Date;
+  created_at?: Date;
   @UpdateDateColumn({ name: 'updated_at' })
-  updated_at: Date;
-  @DeleteDateColumn({ name: 'deleted_at' })
-  deleted_at: Date;
+  updated_at?: Date;
 }

@@ -1,36 +1,83 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as NodeRSA from 'node-rsa';
+import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
 import { SecretNote } from './entities/secretnotes.entity';
+import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
 
 @Injectable()
-export class SecretnotesService {
+export class SecretNoteService {
   constructor(
     @InjectRepository(SecretNote)
-    private readonly secretNoteRepository: Repository<SecretNote>,
+    private readonly secretnoteRepository: Repository<SecretNote>,
   ) {}
 
-  async create(note: string): Promise<SecretNote> {
-    const secretNote = new SecretNote();
-    secretNote.note = note;
-    return await this.secretNoteRepository.save(secretNote);
-  }
+  async create(secretNote: CreateSecretnoteDto): Promise<SecretNote> {
+    // Generate RSA key pair
+    const key = new NodeRSA({ b: 512 });
+    const privateKey = key.exportKey('private');
 
-  async findById(id: string): Promise<SecretNote> {
-    return await this.secretNoteRepository.findOne({ where: { id } });
+    // Encrypt secret note with public key
+    const encryptedNote = key.encrypt(secretNote.note, 'base64');
+
+    // Save encrypted note to database
+    const newSecretNote = this.secretnoteRepository.create({
+      ...secretNote,
+      note: encryptedNote,
+      privateKey,
+    });
+    return await this.secretnoteRepository.save(newSecretNote);
   }
 
   async findAll(): Promise<SecretNote[]> {
-    return await this.secretNoteRepository.find();
+    const secretnotes = await this.secretnoteRepository.find();
+    return secretnotes.map((note) => {
+      // Decrypt secret note with private key
+      const key = new NodeRSA(note.privateKey);
+      const decryptedNote = key.decrypt(note.note, 'utf8');
+      note.note = decryptedNote;
+      return note;
+    });
   }
 
-  async updateById(id: string, note: string): Promise<SecretNote> {
-    const secretNote = await this.findById(id);
-    secretNote.note = note;
-    return await this.secretNoteRepository.save(secretNote);
+  async findOne(id: string, encrypted?: boolean): Promise<SecretNote> {
+    const note = await this.secretnoteRepository.findOne({ where: { id } });
+    if (!note) {
+      return null;
+    }
+    if (encrypted) {
+      return note;
+    }
+    // Decrypt secret note with private key
+    const key = new NodeRSA(note.privateKey);
+    const decryptedNote = key.decrypt(note.note, 'utf8');
+    note.note = decryptedNote;
+    return note;
   }
 
-  async deleteById(id: string): Promise<void> {
-    await this.secretNoteRepository.delete(id);
+  async updateOne(
+    id: string,
+    secretNote: UpdateSecretNoteDto,
+  ): Promise<SecretNote> {
+    // Generate RSA key pair
+    const key = new NodeRSA({ b: 512 });
+    const privateKey = key.exportKey('private');
+
+    // Encrypt secret updated note with public key
+    const encryptedNote = key.encrypt(secretNote.note, 'base64');
+
+    // Save updated note and its private key
+    await this.secretnoteRepository.update(id, {
+      ...secretNote,
+      note: encryptedNote,
+      privateKey,
+    });
+
+    return await this.findOne(id);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.secretnoteRepository.delete(id);
   }
 }

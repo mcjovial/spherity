@@ -1,75 +1,50 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
-import { SecretnotesService } from './secretnotes.service';
-import * as NodeRSA from 'node-rsa';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  Query,
+  Body,
+  Patch,
+} from '@nestjs/common';
 import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
+import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
 import { SecretNote } from './entities/secretnotes.entity';
+import { SecretNoteService } from './secretnotes.service';
 
 @Controller('secretnotes')
-export class SecretnotesController {
-  constructor(private readonly secretNotesService: SecretnotesService) {}
+export class SecretNoteController {
+  constructor(private readonly secretNoteService: SecretNoteService) {}
 
   @Post()
   async create(@Body() secretNote: CreateSecretnoteDto): Promise<SecretNote> {
-    const key = new NodeRSA({ b: 2048 });
-    const encryptedNote = key.encrypt(secretNote.note, 'base64');
-    const createdSecretNote = await this.secretNotesService.create(
-      encryptedNote,
-    );
-    return {
-      ...createdSecretNote,
-      note: encryptedNote,
-    };
-  }
-
-  @Get(':id')
-  async findById(
-    @Param('id') id: string,
-    @Query('decrypted') decrypted: boolean,
-  ): Promise<SecretNote> {
-    const secretNote = await this.secretNotesService.findById(id);
-    if (!secretNote) {
-      throw new Error(`SecretNote with ID ${id} not found`);
-    }
-    const key = new NodeRSA({ b: 2048 });
-    const decryptedNote = key.decrypt(secretNote.note, 'utf8');
-    return {
-      ...secretNote,
-      note: decrypted ? decryptedNote : secretNote.note,
-    };
+    return await this.secretNoteService.create(secretNote);
   }
 
   @Get()
-  async findAll(): Promise<SecretNote[]> {
-    const secretNotes = await this.secretNotesService.findAll();
-    const key = new NodeRSA({ b: 2048 });
-    const decryptedNotes = secretNotes.map((secretNote) => {
-      return {
-        ...secretNote,
-        note: key.decrypt(secretNote.note, 'utf8'),
-      };
-    });
-    return decryptedNotes;
+  async findAll(@Query('encrypted') encrypted: boolean): Promise<SecretNote[]> {
+    return await this.secretNoteService.findAll();
   }
 
-  @Post(':id')
-  async updateById(
+  @Get(':id')
+  async findOne(
     @Param('id') id: string,
-    @Body() secretNote: SecretNote,
+    @Query('encrypted') encrypted: boolean,
   ): Promise<SecretNote> {
-    const key = new NodeRSA({ b: 2048 });
-    const encryptedNote = key.encrypt(secretNote.note, 'base64');
-    const updatedSecretNote = await this.secretNotesService.updateById(
-      id,
-      encryptedNote,
-    );
-    return {
-      ...updatedSecretNote,
-      note: encryptedNote,
-    };
+    return await this.secretNoteService.findOne(id, encrypted);
   }
 
-  @Post(':id/delete')
-  async deleteById(@Param('id') id: string): Promise<void> {
-    await this.secretNotesService.deleteById(id);
+  @Patch(':id')
+  async updateOne(
+    @Param('id') id: string,
+    @Body() newtNote: UpdateSecretNoteDto,
+  ): Promise<SecretNote> {
+    return await this.secretNoteService.updateOne(id, newtNote);
+  }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string): Promise<void> {
+    return await this.secretNoteService.delete(id);
   }
 }
