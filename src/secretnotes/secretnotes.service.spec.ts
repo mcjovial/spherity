@@ -3,7 +3,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SecretNote } from './entities/secretnotes.entity';
 import { SecretNoteService } from './secretnotes.service';
-import * as NodeRSA from 'node-rsa';
 
 describe('SecretNoteService', () => {
   let secretNoteService: SecretNoteService;

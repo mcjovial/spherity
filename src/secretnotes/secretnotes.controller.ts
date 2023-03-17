@@ -8,8 +8,9 @@ import {
   Body,
   Patch,
 } from '@nestjs/common';
-import { CustomNotFoundException } from '../exceptions/customNotFound.exception';
+import { CustomNotFoundException } from '../common/exceptions/customNotFound.exception';
 import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
+import { QueryParamsDto } from './dto/query-params.dto';
 import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
 import { SecretNote } from './entities/secretnotes.entity';
 import { SecretNoteService } from './secretnotes.service';
@@ -24,8 +25,8 @@ export class SecretNoteController {
   }
 
   @Get()
-  async findAll(@Query('encrypted') encrypted: boolean): Promise<SecretNote[]> {
-    return await this.secretNoteService.findAll();
+  async findAll(@Query() query: QueryParamsDto) {
+    return await this.secretNoteService.findAll(query);
   }
 
   @Get(':id')

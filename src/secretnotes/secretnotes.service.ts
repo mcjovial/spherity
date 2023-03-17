@@ -5,6 +5,8 @@ import * as NodeRSA from 'node-rsa';
 import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
 import { SecretNote } from './entities/secretnotes.entity';
 import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
+import { paginateResponse } from '../common/utils/helpers.utils';
+import { QueryParamsDto } from './dto/query-params.dto';
 
 @Injectable()
 export class SecretNoteService {
@@ -26,14 +28,29 @@ export class SecretNoteService {
     return await this.secretnoteRepository.save(newSecretNote);
   }
 
-  async findAll(): Promise<SecretNote[]> {
-    const secretnotes = await this.secretnoteRepository.find();
-    return secretnotes.map((note) => {
-      // Decrypt secret note with private key
-      const decryptedNote = this.decrypter(note.note, note.privateKey);
-      note.note = decryptedNote;
-      return note;
+  async findAll(query?: QueryParamsDto) {
+    const take = Number(query?.take) || 10;
+    const page = Number(query?.page) || 1;
+    const skip = (page - 1) * take;
+
+    console.log(page, skip);
+
+    const [result, count] = await this.secretnoteRepository.findAndCount({
+      take: take,
+      skip: skip,
     });
+
+    if (!query.encrypted) {
+      result.map((note) => {
+        // Decrypt secret note with private key
+        const decryptedNote = this.decrypter(note.note, note.privateKey);
+        note.note = decryptedNote;
+        note.privateKey = undefined;
+        return note;
+      });
+    }
+
+    return paginateResponse([result, count], page, take);
   }
 
   async findOne(id: string, encrypted?: boolean): Promise<SecretNote> {

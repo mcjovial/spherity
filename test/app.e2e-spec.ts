@@ -58,17 +58,47 @@ describe('AppController (e2e)', () => {
   });
   describe('(GET): /secretnotes', () => {
     it('should return an array of secrets with decrypted note when encrypted flag is not provided or false', async () => {
-      // await secretNoteService.create({ note: 'This is a test note 1' });
-      // await secretNoteService.create({ note: 'This is a test note 2' });
       const response = await request(app.getHttpServer())
         .get('/secretnotes')
         .expect(200);
 
-      expect(response.body.length).toBeGreaterThan(1);
-      expect(response.body[0].note).toBeDefined();
-      expect(response.body[0].privateKey).toBeDefined();
-      expect(response.body[0].created_at).toBeDefined();
-      expect(response.body[0].updated_at).toBeDefined();
+      expect(response.body.data.length).toBeGreaterThan(1);
+      expect(response.body.data[0].note).toBeDefined();
+      expect(response.body.data[0].privateKey).not.toBeDefined();
+      expect(response.body.data[0].created_at).toBeDefined();
+      expect(response.body.data[0].updated_at).toBeDefined();
+    });
+    it('should return an array of secrets with encrypted note when encrypted flag is true', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/secretnotes?encrypted=true')
+        .expect(200);
+
+      expect(response.body.data.length).toBeGreaterThan(1);
+      expect(response.body.data[0].note).toBeDefined();
+      expect(response.body.data[0].privateKey).toBeDefined();
+      expect(response.body.data[0].created_at).toBeDefined();
+      expect(response.body.data[0].updated_at).toBeDefined();
+    });
+    it('should return an array of paginated secrets', async () => {
+      const numberOfNotesToGet = 5;
+      const pageToGet = 4;
+
+      const response = await request(app.getHttpServer())
+        .get(
+          `/secretnotes?page=${pageToGet}&take=${numberOfNotesToGet}&encrypted=true`,
+        )
+        .expect(200);
+
+      console.log(response.body);
+
+      expect(response.body.data.length).toBe(numberOfNotesToGet);
+      expect(response.body.count).toBeGreaterThan(numberOfNotesToGet);
+      expect(response.body.currentPage).toBe(pageToGet);
+      expect(response.body.nextPage).toBe(pageToGet + 1);
+      expect(response.body.prevPage).toBe(pageToGet - 1);
+      expect(response.body.lastPage).toBe(
+        Math.ceil(response.body.count / numberOfNotesToGet),
+      );
     });
   });
   describe('(GET): /secretnotes/:id', () => {
