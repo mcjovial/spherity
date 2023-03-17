@@ -28,16 +28,10 @@ describe('AppController (e2e)', () => {
         .post('/secretnotes')
         .send(secretNoteData)
         .expect(201);
-      console.log(response.body.note);
       expect(response.body.data.note).not.toEqual(secretNoteData.note); // Verify that the note is encrypted in the database
       expect(response.body.data.privateKey).toBeDefined();
       expect(response.body.data.created_at).toBeDefined();
       expect(response.body.data.updated_at).toBeDefined();
-
-      // const secretNote = await secretNoteService.findOne(response.body.id);
-
-      // expect(secretNote).toBeDefined();
-      // expect(secretNote.note).not.toEqual(createSecretNoteDto.note);
     });
     it('should return 400 when note field is empty with message', async () => {
       const response = await request(app.getHttpServer())
@@ -89,8 +83,6 @@ describe('AppController (e2e)', () => {
         )
         .expect(200);
 
-      console.log(response.body);
-
       expect(response.body.data.length).toBe(numberOfNotesToGet);
       expect(response.body.count).toBeGreaterThan(numberOfNotesToGet);
       expect(response.body.currentPage).toBe(pageToGet);
@@ -106,7 +98,6 @@ describe('AppController (e2e)', () => {
       const secretNoteData = {
         note: 'This is a test note',
       };
-      // const secretNote = await secretNoteService.create(secretNoteData);
       const secretNote = await request(app.getHttpServer())
         .post('/secretnotes')
         .send(secretNoteData)
@@ -126,7 +117,6 @@ describe('AppController (e2e)', () => {
       const secretNoteData = {
         note: 'This is a test note',
       };
-      // const secretNote = await secretNoteService.create(secretNoteData);
       const secretNote = await request(app.getHttpServer())
         .post('/secretnotes')
         .send(secretNoteData)

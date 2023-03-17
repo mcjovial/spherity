@@ -55,9 +55,7 @@ describe('SecretNoteController', () => {
 
       try {
         const response = await controller.create({ note: 'new note' });
-        console.log(response);
       } catch (error) {
-        console.log(error.response);
         expect(error.response.statusCode).toEqual(400);
         expect(error.response.message).toEqual('Bad Request');
       }
