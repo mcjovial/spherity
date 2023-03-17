@@ -60,6 +60,7 @@ export class SecretNoteService {
     // Decrypt secret note with private key
     const decryptedNote = this.decrypter(note.note, note.privateKey);
     note.note = decryptedNote;
+    note.privateKey = undefined;
     return note;
   }
 

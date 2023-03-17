@@ -29,10 +29,10 @@ describe('AppController (e2e)', () => {
         .send(secretNoteData)
         .expect(201);
       console.log(response.body.note);
-      expect(response.body.note).not.toEqual(secretNoteData.note); // Verify that the note is encrypted in the database
-      expect(response.body.privateKey).toBeDefined();
-      expect(response.body.created_at).toBeDefined();
-      expect(response.body.updated_at).toBeDefined();
+      expect(response.body.data.note).not.toEqual(secretNoteData.note); // Verify that the note is encrypted in the database
+      expect(response.body.data.privateKey).toBeDefined();
+      expect(response.body.data.created_at).toBeDefined();
+      expect(response.body.data.updated_at).toBeDefined();
 
       // const secretNote = await secretNoteService.findOne(response.body.id);
 
@@ -113,13 +113,13 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .get(`/secretnotes/${secretNote.body.id}`)
+        .get(`/secretnotes/${secretNote.body.data.id}`)
         .expect(200);
 
-      expect(response.body.id).not.toBeInstanceOf(Number);
-      expect(response.body.note).toEqual(secretNoteData.note);
-      expect(response.body.created_at).toBeDefined();
-      expect(response.body.updated_at).toBeDefined();
+      expect(response.body.data.id).not.toBeInstanceOf(Number);
+      expect(response.body.data.note).toEqual(secretNoteData.note);
+      expect(response.body.data.created_at).toBeDefined();
+      expect(response.body.data.updated_at).toBeDefined();
     });
 
     it('should return the encrypted secret note with the specified ID when requested', async () => {
@@ -133,13 +133,13 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .get(`/secretnotes/${secretNote.body.id}?encrypted=true`)
+        .get(`/secretnotes/${secretNote.body.data.id}?encrypted=true`)
         .expect(200);
 
-      expect(response.body.id).toEqual(secretNote.body.id);
-      expect(response.body.note).not.toEqual(secretNoteData.note);
-      expect(response.body.created_at).toBeDefined();
-      expect(response.body.updated_at).toBeDefined();
+      expect(response.body.data.id).toEqual(secretNote.body.data.id);
+      expect(response.body.data.note).not.toEqual(secretNoteData.note);
+      expect(response.body.data.created_at).toBeDefined();
+      expect(response.body.data.updated_at).toBeDefined();
     });
 
     it('should return a 404 error when the specified secret note ID does not exist', async () => {
@@ -165,13 +165,13 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .patch(`/secretnotes/${secretNote.body.id}`)
+        .patch(`/secretnotes/${secretNote.body.data.id}`)
         .send(updateDto)
         .expect(200);
 
-      expect(response.body.note).toEqual(updateDto.note);
-      expect(response.body.created_at).toBeDefined();
-      expect(response.body.updated_at).toBeDefined();
+      expect(response.body.data.note).toEqual(updateDto.note);
+      expect(response.body.data.created_at).toBeDefined();
+      expect(response.body.data.updated_at).toBeDefined();
     });
 
     it('should update a secret and return encrypted note when encrypted flag is set to true', async () => {
@@ -185,14 +185,14 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       const response = await request(app.getHttpServer())
-        .patch(`/secretnotes/${secretNote.body.id}`)
+        .patch(`/secretnotes/${secretNote.body.data.id}`)
         .send(updateDto)
         .query({ encrypted: true })
         .expect(200);
 
-      expect(response.body.note).not.toEqual(updateDto.note);
-      expect(response.body.created_at).toBeDefined();
-      expect(response.body.updated_at).toBeDefined();
+      expect(response.body.data.note).not.toEqual(updateDto.note);
+      expect(response.body.data.created_at).toBeDefined();
+      expect(response.body.data.updated_at).toBeDefined();
     });
 
     it('should return 404 when trying to update a non-existent secret', async () => {
@@ -219,11 +219,11 @@ describe('AppController (e2e)', () => {
         .expect(201);
 
       await request(app.getHttpServer())
-        .delete(`/secretnotes/${createdNote.id}`)
+        .delete(`/secretnotes/${createdNote.data.id}`)
         .expect(200);
 
       await request(app.getHttpServer())
-        .get(`/secretnotes/${createdNote.id}`)
+        .get(`/secretnotes/${createdNote.data.id}`)
         .expect(404);
     });
 

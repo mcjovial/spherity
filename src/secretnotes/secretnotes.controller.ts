@@ -9,13 +9,12 @@ import {
   Patch,
   UseInterceptors,
 } from '@nestjs/common';
-import { TransformInterceptor } from 'src/common/interceptors/response-transform.interceptor';
-import { paginateResponse, response } from 'src/common/utils/helpers.utils';
+import { TransformInterceptor } from '../common/interceptors/response-transform.interceptor';
+import { paginateResponse } from '../common/utils/helpers.utils';
 import { CustomNotFoundException } from '../common/exceptions/customNotFound.exception';
 import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
 import { QueryParamsDto } from './dto/query-params.dto';
 import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
-import { SecretNote } from './entities/secretnotes.entity';
 import { SecretNoteService } from './secretnotes.service';
 
 @Controller('secretnotes')
@@ -69,8 +68,13 @@ export class SecretNoteController {
   }
 
   @Delete(':id')
+  @UseInterceptors(TransformInterceptor)
   async delete(@Param('id') id: string) {
-    const result = await this.secretNoteService.delete(id);
-    return { message: 'Deleted successfully!', result };
+    try {
+      const result = await this.secretNoteService.delete(id);
+      return { message: 'Deleted successfully!', result };
+    } catch (error) {
+      throw new CustomNotFoundException('Secret note', id);
+    }
   }
 }
