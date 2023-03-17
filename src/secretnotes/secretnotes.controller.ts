@@ -7,7 +7,10 @@ import {
   Query,
   Body,
   Patch,
+  UseInterceptors,
 } from '@nestjs/common';
+import { TransformInterceptor } from 'src/common/interceptors/response-transform.interceptor';
+import { paginateResponse, response } from 'src/common/utils/helpers.utils';
 import { CustomNotFoundException } from '../common/exceptions/customNotFound.exception';
 import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
 import { QueryParamsDto } from './dto/query-params.dto';
@@ -20,42 +23,54 @@ export class SecretNoteController {
   constructor(private readonly secretNoteService: SecretNoteService) {}
 
   @Post()
-  async create(@Body() secretNote: CreateSecretnoteDto): Promise<SecretNote> {
-    return await this.secretNoteService.create(secretNote);
+  @UseInterceptors(TransformInterceptor)
+  async create(@Body() secretNote: CreateSecretnoteDto) {
+    const result = await this.secretNoteService.create(secretNote);
+    return { message: 'Note Created', result };
   }
 
   @Get()
   async findAll(@Query() query: QueryParamsDto) {
-    return await this.secretNoteService.findAll(query);
+    const [result, count] = await this.secretNoteService.findAll(query);
+    return paginateResponse([result, count], query.page, query.take);
   }
 
   @Get(':id')
+  @UseInterceptors(TransformInterceptor)
   async findOne(
     @Param('id') id: string,
     @Query('encrypted') encrypted: boolean,
-  ): Promise<SecretNote> {
+  ) {
     try {
-      return await this.secretNoteService.findOne(id, encrypted);
+      const result = await this.secretNoteService.findOne(id, encrypted);
+      return { message: '', result };
     } catch (error) {
       throw new CustomNotFoundException('Secret note', id);
     }
   }
 
   @Patch(':id')
+  @UseInterceptors(TransformInterceptor)
   async updateOne(
     @Param('id') id: string,
     @Body() newtNote: UpdateSecretNoteDto,
     @Query('encrypted') encrypted: boolean,
-  ): Promise<SecretNote> {
+  ) {
     try {
-      return await this.secretNoteService.updateOne(id, newtNote, encrypted);
+      const result = await this.secretNoteService.updateOne(
+        id,
+        newtNote,
+        encrypted,
+      );
+      return { message: '', result };
     } catch (error) {
       throw new CustomNotFoundException('Secret note', id);
     }
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    return await this.secretNoteService.delete(id);
+  async delete(@Param('id') id: string) {
+    const result = await this.secretNoteService.delete(id);
+    return { message: 'Deleted successfully!', result };
   }
 }

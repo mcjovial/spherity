@@ -5,7 +5,6 @@ import * as NodeRSA from 'node-rsa';
 import { CreateSecretnoteDto } from './dto/create-secretnote.dto';
 import { SecretNote } from './entities/secretnotes.entity';
 import { UpdateSecretNoteDto } from './dto/update-secretnote.dto';
-import { paginateResponse } from '../common/utils/helpers.utils';
 import { QueryParamsDto } from './dto/query-params.dto';
 
 @Injectable()
@@ -50,7 +49,7 @@ export class SecretNoteService {
       });
     }
 
-    return paginateResponse([result, count], page, take);
+    return [result, count];
   }
 
   async findOne(id: string, encrypted?: boolean): Promise<SecretNote> {
