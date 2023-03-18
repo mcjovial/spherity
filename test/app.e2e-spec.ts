@@ -52,6 +52,11 @@ describe('AppController (e2e)', () => {
   });
   describe('(GET): /secretnotes', () => {
     it('should return an array of secrets with decrypted note when encrypted flag is not provided or false', async () => {
+      for (let i = 0; i < 20; i++) {
+        await request(app.getHttpServer()).post('/secretnotes').send({
+          note: 'This is a test note',
+        });
+      }
       const response = await request(app.getHttpServer())
         .get('/secretnotes')
         .expect(200);
@@ -76,7 +81,6 @@ describe('AppController (e2e)', () => {
     it('should return an array of paginated secrets', async () => {
       const numberOfNotesToGet = 5;
       const pageToGet = 4;
-
       const response = await request(app.getHttpServer())
         .get(
           `/secretnotes?page=${pageToGet}&take=${numberOfNotesToGet}&encrypted=true`,
