@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secretnotes-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secretnotes-api
+  template:
+    metadata:
+      labels:
+        app: secretnotes-api
+    spec:
+      containers:
+        - name: secretnotes-api
+          image: mcjovial/secretnote-api:latest
+          env:
+            - name: POSTGRES_HOST
+              value: postgres
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: mydatabase
+          ports:
+            - containerPort: 3000

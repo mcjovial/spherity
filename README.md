@@ -77,4 +77,4 @@ then returned to the user.
 
 When a note is retrieved, the encrypted flag can be set to true to return the encrypted note. 
 
-The private key to be used for decryption is stored securely on the server and is not exposed to the client.
+The private key to be used for decryption is stored securely on the server.
