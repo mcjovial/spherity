@@ -32,7 +32,6 @@ export class SecretNoteService {
     const page = Number(query?.page) || 1;
     const skip = (page - 1) * take;
 
-
     const [result, count] = await this.secretnoteRepository.findAndCount({
       take: take,
       skip: skip,

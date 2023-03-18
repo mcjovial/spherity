@@ -1,73 +1,80 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Secret Note API
+This is a CRUD API built with NestJS that allows a user to interact with an entity called 'secretNote'. The API allows a user to create, read, update, and delete secret notes.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+### Installation
+Clone the repository `git clone repo` and run the following commands to install the dependencies and start the application:
+```
+npm install
+npm run start:dev
+```
+The API will be available at http://localhost:3000.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Testing
+Run the following command to run the test suite:
+```
+npm run test
+&
+npm run test:e2e
+```
+## Use on docker
+Make sure Docker works properly on your machine. Then simply run:
+```
+docker-compose up
+```
+The API will be available at http://localhost:3000.
+###
+###
+## Usage
+The API provides the following endpoints:
 
-## Description
+**Create a new secret note**
+```
+POST /secretnotes
+```
+Create a new secret note with the following parameters:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- ***note*** (required): The content of the secret note.
 
-## Installation
+Returns a `**201 Created** response with the created secret note in the response body.
 
-```bash
-$ yarn install
+**Get a list of all secret notes**
+```
+GET /secretnotes
+or
+GET /secretnotes/?encrypted=true
+
+```
+Returns a **200 OK** response with an array of all the secret notes decrypted or not in the response body, depending on if the `encrypted=true` query parameter is used.
+
+**Get a single secret note**
+```
+GET /secretnotes/:id
+ or
+GET /secretnotes/:id?encrypted=true
+```
+Returns a single secret note decrypted or not, with the given **id** depending on if the `encrypted=true` query parameter is used. Returns a **200 OK** response with the secret note in the response body if it exists, or a **404 Not Found** response if it does not.
+
+**Update a secret note**
+```
+PATCH /secretnotes/:id
 ```
 
-## Running the app
+Update a secret note with the given `**id** and **note** (optional): The updated content of the secret note.
 
-```bash
-# development
-$ yarn run start
+Returns a **200 OK** response with the updated secret note in the response body if it exists, or a **404 Not Found** response if it does not.
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+**Delete a secret note**
+```
+DELETE /secretnotes/:id
 ```
 
-## Test
+Delete a secret note with the given id. Returns a **204 No Content** response if the note is successfully deleted, or a **404 Not Found** response if the note does not exist.
 
-```bash
-# unit tests
-$ yarn run test
+## Encryption
+The API supports encryption of secret notes using RSA public-key cryptography. When a note is to created or updated, it is first of all encrypted using a public key befor storing it in the database, and when a secrete note is being retrieved,
+it is first of all decrypted with the corresponding private-key
+then returned to the user.
 
-# e2e tests
-$ yarn run test:e2e
+When a note is retrieved, the encrypted flag can be set to true to return the encrypted note. 
 
-# test coverage
-$ yarn run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+The private key to be used for decryption is stored securely on the server and is not exposed to the client.

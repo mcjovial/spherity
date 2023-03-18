@@ -6,10 +6,6 @@ RUN yarn
 COPY . .
 RUN yarn build
 
-# test stage
-FROM build AS test
-RUN yarn test
-
 # production stage
 FROM node:16-alpine AS production
 ARG NODE_ENV=production
