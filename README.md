@@ -1,8 +1,10 @@
 # Secret Note API
 This is a CRUD API built with NestJS that allows a user to interact with an entity called 'secretNote'. The API allows a user to create, read, update, and delete secret notes.
 
+> The postman documentation can be found here: https://documenter.getpostman.com/view/18475215/2s93K1nyaF
+
 ### Installation
-Clone the repository `git clone repo` and run the following commands to install the dependencies and start the application:
+Clone the repository `git clone https://github.com/mcjovial/spherity.git` and run the following commands to install the dependencies and start the application:
 ```
 npm install
 npm run start:dev
