@@ -1,5 +1,5 @@
 # Secret Note API
-This is a CRUD API built with NestJS that allows a user to interact with an entity called 'secretNote'. The API allows a user to create, read, update, and delete secret notes.
+This is a CRUD API built with NestJS and Postgresql with typeorm that allows a user to interact with an entity called 'secretNote'. The API allows a user to create, read, update, and delete secret notes encrypted with the RSA algorithm.
 
 > The postman documentation can be found here: https://documenter.getpostman.com/view/18475215/2s93K1nyaF
 
