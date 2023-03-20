@@ -1,17 +1,25 @@
 # development stage
-FROM node:16-alpine AS development
+FROM node:alpine AS development
 WORKDIR /app
 COPY package*.json ./
 RUN yarn
 COPY . .
 RUN yarn build
 
+# test stage
+FROM node:alpine AS test
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY . .
+EXPOSE 3001
+
 # production stage
-FROM node:16-alpine AS production
+FROM node:alpine AS production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app
 COPY package*.json ./
-RUN yarn --production
+RUN npm ci --production
 COPY --from=development /app/dist ./dist
-CMD ["yarn", "start:prod"]
+CMD ["npm", "run", "start:prod"]
