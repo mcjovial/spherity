@@ -28,3 +28,11 @@ spec:
           env:
             - name: POSTGRES_PASSWORD
               value: postgres
+          resources: # Add resource limits for the backend container
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
+

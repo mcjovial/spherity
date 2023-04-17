@@ -14,8 +14,10 @@ spec:
     spec:
       containers:
         - name: secretnotes-api
-          image: mcjovial/secretnote-api:latest
+          image: mcjovial/spherity
           env:
+            - name: PORT
+              value: "3000"
             - name: POSTGRES_HOST
               value: postgres-service
             - name: POSTGRES_PORT
@@ -25,6 +27,13 @@ spec:
             - name: POSTGRES_PASSWORD
               value: postgres
             - name: POSTGRES_DB
-              value: mydatabase
+              value: postgres
           ports:
             - containerPort: 3000
+          resources: # Add resource limits for the backend container
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+            requests:
+              cpu: "0.5"
+              memory: "256Mi"
